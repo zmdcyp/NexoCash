@@ -1,0 +1,36 @@
+# Build
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+release/
+
+# Gradle
+.gradle/
+build/
+local.properties
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# IDE
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# Mac
+.DS_Store
+
+# Keystore
+*.jks
+*.keystore
+
+# Logs
+*.log

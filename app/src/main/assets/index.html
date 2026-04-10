@@ -1,0 +1,2300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#5B4BA5">
+<title>NexoCash</title>
+<style>
+@font-face { font-family: 'Roboto'; src: url('fonts/Roboto-Light.ttf') format('truetype'); font-weight: 300; font-display: block; }
+@font-face { font-family: 'Roboto'; src: url('fonts/Roboto-Regular.ttf') format('truetype'); font-weight: 400; font-display: block; }
+@font-face { font-family: 'Roboto'; src: url('fonts/Roboto-Medium.ttf') format('truetype'); font-weight: 500; font-display: block; }
+@font-face { font-family: 'Roboto'; src: url('fonts/Roboto-Bold.ttf') format('truetype'); font-weight: 700; font-display: block; }
+
+:root {
+  --primary: #5B4BA5;
+  --primary-d: #4A3D8F;
+  --primary-l: #F3EFFB;
+  --primary-lighter: #F8F5FE;
+  --text: #1A1A26;
+  --text-2: #6E6E7A;
+  --text-3: #A0A0AA;
+  --line: #EEEEF2;
+  --red: #FA2435;
+  --red-l: #FFEAEC;
+  --yellow: #F6A623;
+  --yellow-l: #FFF4DB;
+  --green: #12B968;
+  --green-l: #E4F7EC;
+  --blue: #3A8EE6;
+  --blue-l: #E6F1FC;
+  --bg: #F7F7FA;
+  --card: #FFFFFF;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%;
+  height: 100vh;
+  background: #fff;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.45;
+}
+body { overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+input, textarea, select {
+  font: inherit; color: inherit;
+  background: none; border: none; outline: none;
+  -webkit-appearance: none;
+  width: 100%;
+}
+
+/* ========== scaled stage ========== */
+#stage {
+  position: relative;
+  width: 375px;
+  margin: 0 auto;
+  transform-origin: top center;
+  background: #fff;
+  overflow: hidden;
+  /* height set by JS = vh / scale */
+}
+
+.page {
+  display: none;
+  position: relative;
+  height: 100%;
+  background: #fff;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.page.active { display: block; }
+
+/* page transitions */
+.page.slide-in  { animation: slideIn .28s cubic-bezier(.2,.85,.3,1) both; }
+.page.slide-back{ animation: slideBack .28s cubic-bezier(.2,.85,.3,1) both; }
+.page.fade-in   { animation: fadeIn .22s ease both; }
+@keyframes slideIn   { from { transform: translateX(22%); opacity:0 } to { transform: translateX(0); opacity:1 } }
+@keyframes slideBack { from { transform: translateX(-18%); opacity:0 } to { transform: translateX(0); opacity:1 } }
+@keyframes fadeIn    { from { opacity:0 } to { opacity:1 } }
+
+[data-go], [data-back], .check-row, .clickable { cursor: pointer; }
+
+/* ========== nav bar ========== */
+.nav {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  gap: 6px;
+  border-bottom: 1px solid #F0F0F4;
+}
+.nav::before {
+  content: '';
+  width: 22px;
+  height: 22px;
+  background: url('img/logo.png') no-repeat center/contain;
+  flex-shrink: 0;
+  order: 2;
+}
+.nav::after {
+  content: 'NexoCash';
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  flex-shrink: 0;
+  order: 3;
+}
+.nav.logo-nav::before,
+.nav.logo-nav::after,
+#page-profile .nav::before,
+#page-profile .nav::after { display: none; }
+.nav .back {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: -8px;
+  flex-shrink: 0;
+  order: 1;
+}
+.nav .back svg { width: 10px; height: 18px; }
+.nav .title { display: none; }
+#page-profile .nav .title {
+  display: block;
+  font-size: 17px;
+  font-weight: 500;
+  flex: 1;
+  text-align: center;
+}
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 14px 20px 10px;
+  background: #fff;
+  line-height: 1.3;
+}
+.nav .right {
+  display: flex; align-items: center; gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+  order: 5;
+}
+.lang {
+  display: inline-flex; align-items: center;
+  background: var(--primary-l);
+  color: var(--primary);
+  padding: 3px 8px 3px 6px;
+  border-radius: 11px;
+  font-size: 11px;
+  gap: 4px;
+}
+.lang svg { width: 11px; height: 11px; }
+.avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' rx='20' fill='%235B4BA5'/><circle cx='20' cy='16' r='5.5' fill='%23ffffff'/><path d='M8 36 Q 8 24 20 24 Q 32 24 32 36 L 32 40 L 8 40 Z' fill='%23ffffff'/></svg>") no-repeat center/cover;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.avatar img { display: none; }
+.nav.logo-nav .brand { display: flex; align-items: center; gap: 6px; }
+.nav.logo-nav .brand img { width: 22px; height: 22px; }
+.nav.logo-nav .brand span { font-size: 15px; font-weight: 500; }
+
+/* ========== notice (data secured) ========== */
+.notice {
+  margin: 10px 15px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--blue-l);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  color: #4A6A90;
+  line-height: 1.4;
+}
+.notice svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+.notice.purple { background: var(--primary-l); color: #4E4191; }
+
+/* ========== fields ========== */
+.field {
+  margin: 10px 15px 0;
+  background: #F3F3F7;
+  border-radius: 10px;
+  padding: 9px 14px 10px;
+  position: relative;
+}
+.field .label {
+  font-size: 11px;
+  color: var(--text-2);
+  margin-bottom: 2px;
+  letter-spacing: .2px;
+}
+.field .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  min-height: 20px;
+  color: var(--text);
+}
+.field .row input, .field .row .ph {
+  flex: 1;
+  padding: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+.field .row input::placeholder, .field .row .ph { color: var(--text-3); font-weight: 400; }
+.field .chev {
+  color: var(--text-3);
+  width: 8px; height: 12px;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+.field .chev svg { width: 100%; height: 100%; }
+.field:focus-within {
+  background: #F0EBF9;
+  box-shadow: 0 0 0 2px rgba(91,75,165,.12) inset;
+}
+
+/* section header with icon */
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 16px 15px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+}
+.sec-head svg { width: 14px; height: 14px; }
+.sec-head .hint { margin-left: auto; font-size: 11px; font-weight: 400; color: var(--text-3); }
+
+/* ========== button ========== */
+.btn {
+  display: block;
+  width: calc(100% - 30px);
+  margin: 18px 15px;
+  padding: 13px 0;
+  background: var(--primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(91,75,165,.22);
+  transition: transform .1s, opacity .15s, box-shadow .2s;
+  border: none;
+}
+.btn:active { transform: scale(.97); opacity: .9; box-shadow: 0 3px 10px rgba(91,75,165,.3); }
+.btn.ghost {
+  background: #fff;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  box-shadow: none;
+}
+.btn.ghost:active { background: var(--primary-l); }
+.btn-row {
+  display: flex;
+  gap: 12px;
+  margin: 18px 15px;
+}
+.btn-row .btn { margin: 0; flex: 1; }
+
+/* ========== checkbox row ========== */
+.check-row {
+  display: block;
+  margin: 12px 20px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-2);
+  text-align: left;
+}
+.check-row .box {
+  display: inline-flex;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -2px;
+  margin-right: 6px;
+  transition: all .15s;
+}
+.check-row .box svg { width: 8px; height: 8px; }
+.check-row.off .box { background: transparent; border: 1.5px solid #C4C4CC; }
+.check-row.off .box svg { display: none; }
+.check-row a, .check-row .lnk { color: var(--primary); }
+.check-row.center { text-align: center; }
+
+/* ========== footer (license) ========== */
+.footer {
+  text-align: center;
+  color: var(--text-3);
+  font-size: 10px;
+  line-height: 1.6;
+  padding: 20px 15px 24px;
+}
+.footer .lic { color: var(--text-2); }
+
+/* ========== bottom tabs (fixed, scale with viewport) ========== */
+#tabs {
+  display: none;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 13.333vw;          /* 50 @375 */
+  background: #fff;
+  border-top: 1px solid var(--line);
+  z-index: 200;
+}
+#tabs.on { display: flex; }
+#tabs a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  font-size: 2.666vw;        /* 10 @375 */
+  gap: .4vw;
+}
+#tabs a svg {
+  width: 5.866vw;             /* 22 @375 */
+  height: 5.866vw;
+}
+#tabs a.on { color: var(--primary); }
+.has-tabs { padding-bottom: 58px; }
+
+/* ========== modals ========== */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s;
+}
+.modal-backdrop.on { opacity: 1; pointer-events: auto; }
+.modal {
+  width: calc(100% - 40px);
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  transform: scale(.94);
+  transition: transform .22s;
+  max-height: 82%;
+  display: flex;
+  flex-direction: column;
+}
+.modal-backdrop.on .modal { transform: scale(1); }
+.modal .title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 16px;
+  color: var(--text);
+}
+.modal .body {
+  padding: 0 16px 16px;
+  overflow-y: auto;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.modal .foot {
+  display: flex;
+  border-top: 1px solid var(--line);
+}
+.modal .foot button {
+  flex: 1;
+  padding: 13px;
+  font-size: 15px;
+  color: var(--primary);
+}
+.modal .foot button.primary {
+  background: var(--primary);
+  color: #fff;
+}
+.modal .close {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.3);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  z-index: 2;
+}
+
+/* ========== toast ========== */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28vh;
+  transform: translate(-50%, 8px);
+  background: rgba(0,0,0,.82);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 22px;
+  font-size: 13px;
+  z-index: 400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s, transform .25s;
+  max-width: 80%;
+  text-align: center;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============== SPLASH ============== */
+#page-splash { background: #fff; padding: 0 22px 20px; display: none; }
+#page-splash.active { display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 667px; }
+#page-splash .top { width: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
+#page-splash .top img { width: 72px; height: 72px; margin-top: 8px; }
+#page-splash .top h1 { font-size: 22px; font-weight: 500; margin-top: 10px; color: var(--text); letter-spacing: .5px; }
+#page-splash .mid {
+  width: 100%;
+  background: #F5F3FA;
+  border-radius: 12px;
+  padding: 16px 16px 18px;
+  margin-top: 18px;
+  color: #444;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+#page-splash .mid p + p { margin-top: 12px; }
+#page-splash .mid .urdu { direction: rtl; font-size: 13px; line-height: 1.65; text-align: right; }
+#page-splash .bot { text-align: center; color: var(--text-3); font-size: 11px; line-height: 1.55; padding-bottom: 8px; }
+#page-splash .bot .lic { color: var(--text-2); }
+
+/* ============== PRIVACY ============== */
+#page-privacy { background: #fff; padding-bottom: 20px; }
+#page-privacy .body { padding: 4px 18px 16px; font-size: 13px; line-height: 1.55; color: var(--text); }
+#page-privacy .body > p { margin-top: 10px; }
+#page-privacy h3 { font-size: 14px; font-weight: 500; margin-top: 16px; margin-bottom: 6px; }
+#page-privacy .perm-item {
+  margin-top: 8px;
+  background: #F7F6FB;
+  border-radius: 10px;
+  overflow: hidden;
+}
+#page-privacy .perm-item summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+#page-privacy .perm-item summary::-webkit-details-marker { display: none; }
+#page-privacy .perm-item summary .ico {
+  width: 22px; height: 22px;
+  background: var(--primary-l);
+  color: var(--primary);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+#page-privacy .perm-item summary .label { flex: 1; }
+#page-privacy .perm-item summary .chev {
+  width: 12px; height: 12px;
+  color: var(--text-3);
+  transition: transform .22s ease;
+  flex-shrink: 0;
+}
+#page-privacy .perm-item[open] summary .chev { transform: rotate(180deg); }
+#page-privacy .perm-item[open] summary { color: var(--primary); }
+#page-privacy .perm-item p {
+  color: var(--text-2);
+  font-size: 12px;
+  padding: 0 14px 12px 46px;
+  margin: 0;
+  line-height: 1.55;
+}
+#page-privacy .grievance {
+  margin-top: 20px; padding-top: 12px; border-top: 1px dashed var(--line);
+  font-size: 12px; color: var(--text-2); line-height: 1.75;
+}
+#page-privacy .grievance .title { color: var(--primary); font-weight: 500; margin-bottom: 2px; }
+
+/* ============== HOME ============== */
+#page-home { background: #fff; }
+#page-home .hero {
+  background: linear-gradient(180deg, #F5F0FC 0%, #FFFFFF 80%);
+  padding: 10px 15px 16px;
+  position: relative;
+}
+#page-home .tag-line {
+  text-align: center;
+  font-size: 11px;
+  color: var(--primary);
+  margin: 6px 0 12px;
+  letter-spacing: .3px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+#page-home .tag-line::before, #page-home .tag-line::after {
+  content: "";
+  flex: 0 0 26px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary));
+  align-self: center;
+}
+#page-home .tag-line::after { background: linear-gradient(90deg, var(--primary), transparent); }
+#page-home .amt-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 18px 20px;
+  box-shadow: 0 4px 16px rgba(91,75,165,.08);
+  text-align: center;
+  border: 1px solid #EFEAFA;
+}
+#page-home .amt-card .ttl { font-size: 12px; color: var(--text-2); }
+#page-home .amt-card .amt {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 2px;
+  letter-spacing: .5px;
+}
+#page-home .amt-card .stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+}
+#page-home .amt-card .stat { flex: 1; text-align: center; }
+#page-home .amt-card .stat .ico {
+  width: 26px; height: 26px;
+  background: var(--primary-l);
+  color: var(--primary);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+#page-home .amt-card .stat .ico svg { width: 14px; height: 14px; }
+#page-home .amt-card .stat .lbl { font-size: 10px; color: var(--text-2); }
+#page-home .amt-card .stat .val { font-size: 12px; color: var(--text); font-weight: 500; margin-top: 2px; }
+#page-home .home-check {
+  margin: 10px 4px 0;
+  text-align: center;
+}
+
+#page-home .sg {
+  margin: 18px 15px 0;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #EEEEF2;
+  padding: 14px 14px 14px;
+}
+#page-home .sg h3 {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+#page-home .sg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+#page-home .sg-grid .cell {
+  background: var(--primary-lighter);
+  border-radius: 10px;
+  padding: 12px 10px 11px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#page-home .sg-grid .ico {
+  width: 36px; height: 36px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(91,75,165,.22);
+}
+#page-home .sg-grid .ico svg { width: 18px; height: 18px; }
+#page-home .sg-grid .tt {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: 7px;
+}
+#page-home .sg-grid .dd {
+  font-size: 10.5px;
+  color: var(--text-2);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+#page-home .banner {
+  margin: 18px 15px 0;
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #6B55BD 0%, #4A3D8F 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+#page-home .banner .t1 { font-size: 15px; font-weight: 600; }
+#page-home .banner .t2 { font-size: 11px; opacity: .8; margin-top: 2px; }
+#page-home .banner img { width: 70px; height: 60px; object-fit: contain; }
+#page-home .about {
+  margin: 16px 15px 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text-2);
+  padding: 0 2px;
+}
+#page-home .griv {
+  margin: 14px 15px 0;
+  font-size: 11px;
+  color: var(--text-2);
+  line-height: 1.7;
+}
+#page-home .griv .title { color: var(--primary); font-weight: 500; }
+
+/* ============== CALCULATOR ============== */
+#page-calc { background: #fff; }
+#page-calc .amt-card {
+  margin: 14px 15px 0;
+  background: #F5F3FA;
+  border-radius: 14px;
+  padding: 18px 18px 22px;
+}
+#page-calc .amt-card .ttl { text-align: center; font-size: 12px; color: var(--text-2); }
+#page-calc .amt-card .amt {
+  text-align: center;
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 4px;
+  letter-spacing: .5px;
+}
+#page-calc .amt-card .slider { margin-top: 18px; padding: 0 2px; }
+#page-calc .amt-card .slider input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary) 80%, #E6E6EC 80%, #E6E6EC 100%);
+  border-radius: 3px;
+  outline: none;
+}
+#page-calc .amt-card .slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  background: var(--yellow);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(246,166,35,.4);
+}
+#page-calc .amt-card .range-lbl {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--text-2); margin-top: 8px;
+}
+#page-calc .info-card {
+  margin: 14px 15px 0;
+  background: #F5F3FA;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+#page-calc .info-card .line {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px dashed #E6E0EE;
+  font-size: 13px;
+  color: var(--text-2);
+}
+#page-calc .info-card .line:last-child { border-bottom: none; }
+#page-calc .info-card .line .v { color: var(--text); font-weight: 500; }
+
+/* ============== LOGIN shared ============== */
+.login-body {
+  padding: 14px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.login-body > h1 {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+  margin: 0 0 18px;
+}
+.login-body .alert {
+  background: #E8F6FC;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.login-body .alert .txt { flex: 1; font-size: 11px; color: #3A6A90; line-height: 1.45; }
+.login-body .alert .txt b { color: var(--text); font-weight: 500; display: block; margin-bottom: 2px; }
+.login-body .alert img { width: 34px; height: 34px; flex-shrink: 0; }
+.phone-row {
+  display: flex;
+  align-items: center;
+  background: #F3F3F7;
+  border-radius: 10px;
+  padding: 10px 14px;
+  gap: 10px;
+  margin-bottom: 12px;
+  min-height: 44px;
+  transition: background .15s, box-shadow .15s;
+}
+.phone-row:focus-within {
+  background: #F0EBF9;
+  box-shadow: 0 0 0 2px rgba(91,75,165,.15);
+}
+.phone-row .flag {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #01A652;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 10px;
+}
+.phone-row .prefix { font-size: 14px; color: var(--text); }
+.phone-row input { flex: 1; font-size: 14px; }
+.phone-row input::placeholder { color: var(--text-3); }
+.phone-row .modify {
+  background: #fff;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.phone-row .modify svg { width: 10px; height: 10px; }
+.pw-row, .otp-row {
+  display: flex;
+  align-items: center;
+  background: #F3F3F7;
+  border-radius: 10px;
+  padding: 10px 14px;
+  gap: 10px;
+  margin-bottom: 12px;
+  min-height: 44px;
+  transition: background .15s, box-shadow .15s;
+}
+.pw-row:focus-within, .otp-row:focus-within {
+  background: #F0EBF9;
+  box-shadow: 0 0 0 2px rgba(91,75,165,.15);
+}
+.pw-row .ico, .otp-row .ico { color: var(--text-3); font-size: 16px; display: flex; }
+.pw-row input, .otp-row input { flex: 1; font-size: 14px; }
+.pw-row input::placeholder, .otp-row input::placeholder { color: var(--text-3); }
+.otp-row .get {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: underline;
+}
+.login-link-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 4px 0;
+  font-size: 12px;
+}
+.login-link-row a { color: var(--primary); }
+
+/* ============== CNIC upload ============== */
+.cnic-row {
+  display: flex;
+  gap: 12px;
+  margin: 8px 15px 0;
+}
+.cnic-card {
+  flex: 1;
+  aspect-ratio: 1.58;
+  background: #F4F0FA;
+  border: 1px dashed #B9ACD9;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+.cnic-card .cam {
+  width: 34px; height: 34px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cnic-card .cam svg { width: 18px; height: 18px; }
+.cnic-lbl {
+  display: flex;
+  gap: 12px;
+  margin: 6px 15px 0;
+  font-size: 11px;
+  color: var(--text-2);
+}
+.cnic-lbl span { flex: 1; text-align: center; }
+.selfie-wrap {
+  margin: 14px 15px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.selfie-circle {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  background: #F4F0FA;
+  border: 1px dashed #B9ACD9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  position: relative;
+}
+.selfie-circle .cam {
+  width: 40px; height: 40px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.selfie-circle .cam svg { width: 20px; height: 20px; }
+.selfie-wrap .lbl { font-size: 11px; color: var(--text-2); margin-top: 6px; }
+
+/* ============== AMOUNT ============== */
+#page-amount { background: #fff; }
+.amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F3F3F7;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 6px 15px 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+}
+.amount-row .chev { color: var(--text-3); font-size: 18px; }
+.amount-lbl {
+  margin: 14px 15px 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.term-card {
+  position: relative;
+  margin: 8px 15px 0;
+  background: #fff;
+  border: 1.5px solid #D9D0EA;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text);
+  transition: all .2s;
+}
+.term-card .t1 { font-size: 13px; font-weight: 500; color: var(--primary); }
+.term-card .t2 { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+.term-card .rate { color: var(--yellow); font-weight: 500; }
+.term-card.sel {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.term-card.sel .t1, .term-card.sel .t2, .term-card.sel .rate { color: #fff; }
+.term-card.sel::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 24px; height: 24px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M24 0H8l16 16z'/></svg>") no-repeat;
+}
+.term-card.sel::before {
+  content: "✓";
+  position: absolute;
+  top: 2px; right: 4px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 1;
+}
+.sched-card {
+  margin: 14px 15px 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 4px 14px;
+}
+.sched-card .hd {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 0 6px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sched-row {
+  display: flex;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+  gap: 12px;
+  align-items: flex-start;
+}
+.sched-row:last-child { border-bottom: none; }
+.sched-row .num {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--primary-l);
+  color: var(--primary);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.sched-row .num svg { width: 11px; height: 11px; }
+.sched-row .info { flex: 1; }
+.sched-row .info .k { font-size: 10px; color: var(--text-2); }
+.sched-row .info .v { font-size: 12px; color: var(--text); margin-top: 1px; }
+.detail-card {
+  margin: 14px 15px 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 4px 14px;
+}
+.detail-card .hd {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 0 6px;
+  border-bottom: 1px solid var(--line);
+}
+.detail-card .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.detail-card .row .v { color: var(--text); font-weight: 500; }
+.cool-card {
+  margin: 14px 15px 0;
+  background: #FFF9EC;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 11px;
+  color: #8B6A15;
+  line-height: 1.55;
+}
+.cool-card .hd {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #8B6A15;
+  margin-bottom: 6px;
+}
+.cool-card .hd .date { color: var(--red); }
+
+/* ============== PENDING / REPAYING / SETTLED ============== */
+#page-pending .illust {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24px;
+}
+#page-pending .illust img { width: 120px; height: auto; }
+#page-pending .illust h2 { font-size: 18px; font-weight: 600; color: var(--text); margin-top: 8px; }
+#page-pending .illust p {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.55;
+  margin-top: 8px;
+  padding: 0 30px;
+}
+#page-pending .order-card {
+  margin: 20px 15px 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+#page-pending .order-card .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--text-2);
+  border-bottom: 1px dashed var(--line);
+}
+#page-pending .order-card .row:last-child { border-bottom: none; }
+#page-pending .order-card .row .v { color: var(--text); font-weight: 500; }
+
+#page-repaying, #page-settled, #page-overdue { background: #fff; }
+.pill {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--green-l);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 10px;
+  margin: 12px 15px 0;
+}
+.pill.red { background: var(--yellow-l); color: var(--yellow); }
+.big-amount {
+  text-align: center;
+  padding: 10px 0 6px;
+}
+.big-amount .lbl { font-size: 12px; color: var(--text-2); }
+.big-amount .v {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 2px;
+  letter-spacing: .5px;
+}
+.big-amount .sub { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+.repay-btn {
+  display: block;
+  margin: 14px 15px 0;
+  padding: 13px 0;
+  background: var(--primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(91,75,165,.22);
+  transition: transform .1s, opacity .15s;
+}
+.repay-btn:active { transform: scale(.97); opacity: .9; }
+.repay-list-head {
+  margin: 18px 15px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.inst-card {
+  margin: 8px 15px 0;
+  background: #F7F7FA;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.inst-card .top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.inst-card .num {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--primary-l);
+  color: var(--primary);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.inst-card .num svg { width: 11px; height: 11px; }
+.inst-card .amt { font-size: 14px; font-weight: 700; color: var(--text); }
+.inst-card .amt.red { color: var(--red); }
+.inst-card .dt {
+  font-size: 11.5px;
+  color: var(--text-2);
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+.inst-card .due {
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--red);
+}
+.inst-card .due.gray { color: var(--text-2); }
+
+/* ============== PROFILE ============== */
+#page-profile { background: var(--bg); }
+#page-profile .me-card {
+  background: linear-gradient(135deg, #6B55BD 0%, #4A3D8F 100%);
+  color: #fff;
+  padding: 18px 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#page-profile .me-card .avatar { width: 56px; height: 56px; border: 2px solid rgba(255,255,255,0.45); }
+#page-profile .me-card .name { font-size: 16px; font-weight: 500; }
+#page-profile .me-card .phone { font-size: 12px; opacity: .85; margin-top: 2px; }
+#page-profile .menu {
+  margin: 14px 15px 0;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+#page-profile .menu .it {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+#page-profile .menu .it:last-child { border-bottom: none; }
+#page-profile .menu .it .ico {
+  width: 22px; height: 22px;
+  color: var(--primary);
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#page-profile .menu .it .ico svg { width: 18px; height: 18px; }
+#page-profile .menu .it .chev { color: var(--text-3); margin-left: auto; }
+
+/* ============== dev nav ============== */
+#devnav {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.88); color: #fff; padding: 6px;
+  display: flex; flex-wrap: wrap; gap: 4px; font-size: 10px;
+  max-height: 34vh; overflow: auto; z-index: 9999;
+}
+#devnav.hidden { display: none; }
+#devnav a { color: #fff; background: var(--primary); padding: 4px 6px; border-radius: 3px; }
+#devnav a.on { background: var(--red); }
+#devtoggle {
+  position: fixed; right: 0; top: 0;
+  width: 44px; height: 44px;
+  z-index: 10000; user-select: none;
+  background: transparent;
+  font-size: 0;
+  color: transparent;
+}
+#fileInput { display: none; }
+
+/* ========== watermark ========== */
+#watermark {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='190' viewBox='0 0 280 190'><text x='140' y='100' font-family='Arial,Helvetica,sans-serif' font-size='22' font-weight='700' fill='rgba(91,75,165,0.10)' text-anchor='middle' transform='rotate(-26 140 100)' letter-spacing='1'>NEXOLEND DEMO</text></svg>");
+  background-repeat: repeat;
+  background-size: 280px 190px;
+}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+<!-- ============================================================
+     1. SPLASH
+============================================================ -->
+<section class="page" id="page-splash">
+  <div class="top">
+    <img src="img/logo.png" alt="NexoCash">
+    <h1>NexoCash</h1>
+  </div>
+  <div class="mid">
+    <p>NexoCash apps provide quick and easy loans. NexoCash is short term loans with high interest rates and additional charges. It is essential that you understand potential risk of over indebtedness. Borrow responsibly and only take loans that you can comfortably repay within the agreed timeframe to avoid financial difficulties. Always read the terms and conditions carefully before availing any loan.</p>
+    <p class="urdu">ایپس فوری اور آسان قرض فراہم کرتی ہیں۔ NexoCash اعلیٰ شرح سود اور اضافی چارجز کے ساتھ مختصر مدت کے قرضے ہیں۔ یہ ضروری ہے کہ آپ زیادہ مقروض ہونے کے ممکنہ خطرے کو سمجھیں۔ ذمہ داری سے قرض لیں اور صرف وہ قرض لیں جو آپ مالی مشکلات سے بچنے کے لیے طے شدہ وقت کے اندر آرام سے ادا کر سکتے ہیں۔ کوئی بھی قرض لینے سے پہلے ہمیشہ شرائط و ضوابط کو غور سے پڑھیں۔</p>
+  </div>
+  <div class="bot">
+    <div class="lic">Licensed by SECP &amp; Powered by</div>
+    <div class="lic">NEXOLEND FINANCIALS (PRIVATE) LIMITED</div>
+    <div>License No. XXXXXXXXXXXXXXXX</div>
+    <div style="margin-top:6px;">Disclaimer: only download App if you want loan for emergency<br>matters or for essential matters</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     2. PRIVACY / DISCLOSURE
+============================================================ -->
+<section class="page" id="page-privacy">
+  <div class="nav">
+    <div class="title">Disclosure Statement</div>
+    <div class="right">
+      <span class="lang">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+        اردو
+      </span>
+    </div>
+  </div>
+  <div class="body">
+    <p>At NexoCash, protecting the personal information of our employees, customers, and partners is our top priority. We strictly adhere to a no-disclosure policy: your personal data will never be shared with third parties unless required by law or explicitly stated in this policy.</p>
+    <h3>How We Use Your Permissions:</h3>
+    <details class="perm-item">
+      <summary>
+        <span class="ico">📍</span>
+        <span class="label">Location Services</span>
+        <svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,5 6,8 9,5"/></svg>
+      </summary>
+      <p>We use approximate (coarse) location data to identify your general neighborhood. This helps us refine our credit modeling and strengthen our anti-fraud systems.</p>
+    </details>
+    <details class="perm-item">
+      <summary>
+        <span class="ico">📱</span>
+        <span class="label">Installed Application Data</span>
+        <svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,5 6,8 9,5"/></svg>
+      </summary>
+      <p>NexoCash analyzes the list of apps installed on your device to help us assess creditworthiness and detect potential loan-related fraud. This data is securely uploaded to our private servers.</p>
+    </details>
+    <details class="perm-item">
+      <summary>
+        <span class="ico">📷</span>
+        <span class="label">Camera Access</span>
+        <svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,5 6,8 9,5"/></svg>
+      </summary>
+      <p>Camera access is required exclusively for the KYC (Know Your Customer) process. You will use it to capture and upload photos of your ID and other necessary documents during your application.</p>
+    </details>
+    <details class="perm-item">
+      <summary>
+        <span class="ico">📅</span>
+        <span class="label">Calendar Integration</span>
+        <svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,5 6,8 9,5"/></svg>
+      </summary>
+      <p>To help you maintain a healthy credit history, we sync with your calendar to provide repayment reminders and bill alerts. We only access "financial-only" calendar events—specifically those related to loans and payments.</p>
+    </details>
+    <div class="grievance">
+      <div class="title">Grievance Redressal Officer</div>
+      <div>Email: compliance@nexolend.com</div>
+      <div>Phone: 03888888888</div>
+    </div>
+  </div>
+  <div class="check-row center">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have read <a>&lt;Privacy Policy&gt;</a> carefully.
+  </div>
+  <div class="btn-row">
+    <button class="btn ghost" data-go="page-splash">Refuse</button>
+    <button class="btn" data-go="page-home">Agree and Continue</button>
+  </div>
+  <div class="footer">
+    <div class="lic">Licensed by SECP &amp; Powered by</div>
+    <div class="lic">NEXOLEND FINANCIALS (PRIVATE) LIMITED</div>
+    <div>License No. XXXXXXXXXXXXXXXX</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     3. HOME
+============================================================ -->
+<section class="page has-tabs" id="page-home">
+  <div class="nav logo-nav">
+    <div class="brand">
+      <img src="img/logo.png" alt="">
+      <span>NexoCash</span>
+    </div>
+    <div class="right">
+      <span class="lang">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+        اردو
+      </span>
+      <span class="avatar"><img src="img/cnic_sample.png" alt=""></span>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="tag-line">Intelligent review · Fast disbursement · Secure · Trustworthy</div>
+    <div class="amt-card">
+      <div class="ttl">The highest amount (PKR)</div>
+      <div class="amt">50,000</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg></div>
+          <div class="lbl">Maximum term</div>
+          <div class="val">90 days</div>
+        </div>
+        <div class="stat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M5 9l7-7 7 7M5 15l7 7 7-7"/></svg></div>
+          <div class="lbl">Lowest rate</div>
+          <div class="val">0.3%/day</div>
+        </div>
+        <div class="stat">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/></svg></div>
+          <div class="lbl">Disbursement</div>
+          <div class="val">in 1 min</div>
+        </div>
+      </div>
+      <button class="btn" style="margin:16px 0 0;width:100%" data-go="page-login-phone">Apply Now</button>
+      <div class="check-row home-check">
+        <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+        <span>I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully</span>
+      </div>
+    </div>
+  </div>
+  <div class="sg">
+    <h3>Service Guarantee</h3>
+    <div class="sg-grid">
+      <div class="cell">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/></svg></div>
+        <div class="tt">Security</div>
+        <div class="dd">Regulated by SECP</div>
+      </div>
+      <div class="cell">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <div class="tt">Clear Steps</div>
+        <div class="dd">Apply in 3 steps</div>
+      </div>
+      <div class="cell">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/></svg></div>
+        <div class="tt">Fast Payout</div>
+        <div class="dd">Funds in 1 minute</div>
+      </div>
+      <div class="cell">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 7h14l-2 6H7L5 7zM4 21h16"/></svg></div>
+        <div class="tt">Lawful Collection</div>
+        <div class="dd">Civilized &amp; compliant</div>
+      </div>
+    </div>
+  </div>
+  <div class="banner">
+    <div>
+      <div class="t1">Simple Loans in Just 3 Steps!</div>
+      <div class="t2">Fast processing</div>
+    </div>
+    <img src="img/coins.png" alt="">
+  </div>
+  <p class="about">NexoCash offers convenient short-term credit solutions. Please note that these products carry higher interest rates and applicable service fees. We urge you to assess the risks of over-indebtedness before proceeding. Borrow responsibly—ensure you can meet the repayment schedule comfortably to maintain your credit health.</p>
+  <div class="griv">
+    <div class="title">Grievance Redressal Officer</div>
+    Email: compliance@nexolend.com<br>
+    Phone: 03888888888
+  </div>
+  <div class="footer">
+    <div class="lic">Licensed by SECP &amp; Powered by</div>
+    <div class="lic">NEXOLEND FINANCIALS (PRIVATE) LIMITED</div>
+    <div>License No. XXXXXXXXXXXXXXXX</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     4. CALCULATOR
+============================================================ -->
+<section class="page has-tabs" id="page-calc">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Loan Calculator</div>
+    <div class="right">
+      <span class="avatar"><img src="img/cnic_sample.png" alt=""></span>
+    </div>
+  </div>
+  <div class="amt-card">
+    <div class="ttl">Amount(PKR)</div>
+    <div class="amt" id="calc-amt">50,000</div>
+    <div class="slider">
+      <input type="range" min="1000" max="50000" step="1000" value="50000" id="calc-slider">
+      <div class="range-lbl"><span>PKR 1,000</span><span>PKR 50,000</span></div>
+    </div>
+  </div>
+  <div class="field clickable">
+    <div class="label">Number of installments</div>
+    <div class="row"><span>2 installments (total 30 days)</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div>
+  </div>
+  <div class="field clickable">
+    <div class="label">Installments schedule</div>
+    <div class="row"><span>PKR 30,625/installment</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div>
+  </div>
+  <div class="info-card">
+    <div class="line">Daily rate<span class="v">0.75%</span></div>
+    <div class="line">APR<span class="v">273.75%</span></div>
+    <div class="line">Total repayment amount<span class="v">PKR 61,250</span></div>
+  </div>
+  <button class="btn" data-go="page-login-phone">Apply for the Loan</button>
+  <div class="check-row">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+  </div>
+</section>
+
+<!-- ============================================================
+     5a. LOGIN PHONE
+============================================================ -->
+<section class="page" id="page-login-phone">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title"></div>
+    <div class="right">
+      <span class="lang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>اردو</span>
+      <span class="avatar"><img src="img/cnic_sample.png" alt=""></span>
+    </div>
+  </div>
+  <div class="login-body">
+    <h1>Login</h1>
+    <div class="phone-row">
+      <span class="flag">EP</span>
+      <span class="prefix">+92</span>
+      <input type="tel" placeholder="Please enter.">
+    </div>
+    <button class="btn" style="margin:12px 0 0;width:100%" data-go="page-login-otp">Login</button>
+    <div class="check-row" style="margin:12px 0 0;">
+      <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+      I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+    </div>
+    <div class="alert" style="margin-top:16px;background:#E9F6EE;">
+      <div class="txt"><b>Security Alert:</b>Never share your OTP or Passwords with anyone.</div>
+      <img src="img/shield.png" alt="">
+    </div>
+    <div style="text-align:center;margin-top:14px;font-size:12px;">
+      <a data-go="page-login-password" style="color:var(--primary);">Login with password</a>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="lic">Licensed by SECP &amp; Powered by</div>
+    <div class="lic">NEXOLEND FINANCIALS (PRIVATE) LIMITED</div>
+    <div>License No. XXXXXXXXXXXXXXXX</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     5b. LOGIN OTP
+============================================================ -->
+<section class="page" id="page-login-otp">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title"></div>
+    <div class="right">
+      <span class="lang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>اردو</span>
+      <span class="avatar"><img src="img/cnic_sample.png" alt=""></span>
+    </div>
+  </div>
+  <div class="login-body">
+    <h1>Login</h1>
+    <div class="alert">
+      <div class="txt"><b>SECURE ALERT</b>Our staff will never request your OTP under any circumstances. Anyone who asks for your OTP is Fraud.</div>
+      <img src="img/shield.png" alt="">
+    </div>
+    <div class="phone-row">
+      <span class="flag">EP</span>
+      <span class="prefix">+92</span>
+      <input type="tel" value="123456789" readonly>
+      <button class="modify" data-back>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Modify
+      </button>
+    </div>
+    <div class="otp-row">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+      <input type="tel" placeholder="Please enter OTP code">
+      <a class="get">Get OTP</a>
+    </div>
+    <button class="btn" style="margin:14px 0 0;width:100%" data-go="page-login-setpw">Login</button>
+    <div class="check-row" style="margin:12px 0 0;">
+      <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+      I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+    </div>
+  </div>
+  <div class="footer">
+    <div class="lic">Licensed by SECP &amp; Powered by</div>
+    <div class="lic">NEXOLEND FINANCIALS (PRIVATE) LIMITED</div>
+    <div>License No. XXXXXXXXXXXXXXXX</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     5c. SET PASSWORD
+============================================================ -->
+<section class="page" id="page-login-setpw">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title"></div>
+    <div class="right">
+      <span class="lang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>اردو</span>
+      <span class="avatar"><img src="img/cnic_sample.png" alt=""></span>
+    </div>
+  </div>
+  <div class="login-body">
+    <h1>Set Password</h1>
+    <div class="alert">
+      <div class="txt"><b>OFFICIAL SECURITY NOTICE</b>Our staff will never request your account password</div>
+      <img src="img/shield.png" alt="">
+    </div>
+    <div class="phone-row">
+      <span class="flag">EP</span>
+      <span class="prefix">+92</span>
+      <input type="tel" value="123456789" readonly>
+      <button class="modify" data-back>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Modify
+      </button>
+    </div>
+    <div class="pw-row">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+      <input type="password" placeholder="Set your password">
+    </div>
+    <div class="pw-row">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+      <input type="password" placeholder="Confirm your password">
+    </div>
+    <div class="login-link-row" style="justify-content:flex-end;"><a>Get OTP</a></div>
+    <div class="btn-row" style="margin:16px 0 0;">
+      <button class="btn ghost" data-go="page-form-personal">Skip</button>
+      <button class="btn" data-go="page-form-personal">Confirm</button>
+    </div>
+    <div class="check-row" style="margin:12px 0 0;">
+      <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+      I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+    </div>
+  </div>
+  <div class="footer">
+    <div class="lic">Licensed by SECP &amp; Powered by</div>
+    <div class="lic">NEXOLEND FINANCIALS (PRIVATE) LIMITED</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     5d. LOGIN PASSWORD
+============================================================ -->
+<section class="page" id="page-login-password">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title"></div>
+    <div class="right">
+      <span class="lang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>اردو</span>
+      <span class="avatar"><img src="img/cnic_sample.png" alt=""></span>
+    </div>
+  </div>
+  <div class="login-body">
+    <h1>Login</h1>
+    <div class="alert">
+      <div class="txt"><b>OFFICIAL SECURITY NOTICE</b>Our staff will never request your account password</div>
+      <img src="img/shield.png" alt="">
+    </div>
+    <div class="phone-row">
+      <span class="flag">EP</span>
+      <span class="prefix">+92</span>
+      <input type="tel" value="123456789" readonly>
+      <button class="modify" data-back>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Modify
+      </button>
+    </div>
+    <div class="pw-row">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+      <input type="password" placeholder="Enter your password">
+    </div>
+    <div class="login-link-row">
+      <a data-go="page-login-otp">Use OTP to login</a>
+      <a>Forgot your password?</a>
+    </div>
+    <button class="btn" style="margin:18px 0 0;width:100%" data-go="page-home">Login</button>
+    <div class="check-row" style="margin:12px 0 0;">
+      <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+      I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+    </div>
+  </div>
+  <div class="footer">
+    <div class="lic">Licensed by SECP &amp; Powered by</div>
+    <div class="lic">NEXOLEND FINANCIALS (PRIVATE) LIMITED</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     6a. FORM PERSONAL
+============================================================ -->
+<section class="page" id="page-form-personal">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Basic Information</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="notice">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/></svg>
+    Your data is secured with bank-grade encryption for regulatory compliance.
+  </div>
+  <div class="field"><div class="label">Name</div><div class="row"><input type="text" placeholder="Please enter"></div></div>
+  <div class="field clickable"><div class="label">Gender</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field"><div class="label">E-mail</div><div class="row"><input type="email" placeholder="Please enter"></div></div>
+  <div class="field clickable"><div class="label">Education level</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Married status</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field"><div class="label">Number of children</div><div class="row"><input type="number" placeholder="Please enter"></div></div>
+  <button class="btn" data-go="page-form-employment">Next</button>
+  <div class="check-row">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+  </div>
+</section>
+
+<!-- ============================================================
+     6b. FORM EMPLOYMENT
+============================================================ -->
+<section class="page" id="page-form-employment">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Employment Information</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="notice">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/></svg>
+    Your data is secured with bank-grade encryption for regulatory compliance.
+  </div>
+  <div class="field clickable"><div class="label">Occupation</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Working years</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Pay period</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Source of income</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Monthly income</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Family monthly income</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Is the annual salary less than 1.2 million?</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Do you have any outstanding debts with other loan companies</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field clickable"><div class="label">Amount owed to other companies</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <button class="btn" data-go="page-form-witness">Next</button>
+  <div class="check-row">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+  </div>
+</section>
+
+<!-- ============================================================
+     6c. FORM WITNESS
+============================================================ -->
+<section class="page" id="page-form-witness">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Witness Information</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="notice">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/></svg>
+    Your data is secured with bank-grade encryption for regulatory compliance.
+  </div>
+  <div class="sec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg>Reference Witness 1</div>
+  <div class="field clickable"><div class="label">Relationship</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field"><div class="label">Name</div><div class="row"><input type="text" placeholder="Please enter"></div></div>
+  <div class="field"><div class="label">Mobile phone number</div><div class="row"><input type="tel" placeholder="Please enter"></div></div>
+  <div class="sec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg>Reference Witness 2</div>
+  <div class="field clickable"><div class="label">Relationship</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field"><div class="label">Name</div><div class="row"><input type="text" placeholder="Please enter"></div></div>
+  <div class="field"><div class="label">Mobile phone number</div><div class="row"><input type="tel" placeholder="Please enter"></div></div>
+  <button class="btn" data-go="page-form-cnic">Next</button>
+  <div class="check-row">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+  </div>
+</section>
+
+<!-- ============================================================
+     6d. FORM CNIC
+============================================================ -->
+<section class="page" id="page-form-cnic">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">CNIC Information</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="notice">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/></svg>
+    Your data is secured with bank-grade encryption for regulatory compliance.
+  </div>
+  <div class="sec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M8 6l2-3h4l2 3"/></svg>Upload CNIC<span class="hint">Please take a photo of the original card</span></div>
+  <div class="cnic-row">
+    <label class="cnic-card pickFile"><div class="cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M8 6l2-3h4l2 3"/></svg></div></label>
+    <label class="cnic-card pickFile"><div class="cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M8 6l2-3h4l2 3"/></svg></div></label>
+  </div>
+  <div class="cnic-lbl"><span>Front Side</span><span>Back Side</span></div>
+  <div class="sec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h4M7 13h10M7 17h7"/></svg>CNIC Information</div>
+  <div class="field"><div class="label">CNIC number <a style="float:right;color:var(--primary);font-size:11px;">Example ▾</a></div><div class="row"><input type="text" placeholder="Enter a 13-digit CNIC number"></div></div>
+  <div class="field"><div class="label">Date of birth</div><div class="row"><input type="text" placeholder="Please enter"></div></div>
+  <div class="field clickable"><div class="label">Date of issue</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field"><div class="label">Current province</div><div class="row"><input type="text" placeholder="Please enter"></div></div>
+  <div class="field"><div class="label">Current address</div><div class="row"><input type="text" placeholder="Please enter"></div></div>
+  <div class="sec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg>Upload Your Selfie</div>
+  <div class="selfie-wrap">
+    <label class="selfie-circle pickFile"><div class="cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M8 6l2-3h4l2 3"/></svg></div></label>
+    <div class="lbl">Please click</div>
+  </div>
+  <button class="btn" data-go="page-form-receiving">Next</button>
+  <div class="check-row">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+  </div>
+</section>
+
+<!-- ============================================================
+     6e. FORM RECEIVING
+============================================================ -->
+<section class="page" id="page-form-receiving">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Receiving Account Information</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="notice">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/></svg>
+    Your data is secured with bank-grade encryption for regulatory compliance.
+  </div>
+  <div class="sec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 11h20M6 16h4"/></svg>Select Your Receiving Account</div>
+  <div class="field clickable"><div class="label">Type</div><div class="row"><span class="ph">Please select</span><span class="chev"><svg viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,2 6,6 2,10"/></svg></span></div></div>
+  <div class="field"><div class="label">Mobile wallet account</div><div class="row"><input type="tel" placeholder="Please enter"></div></div>
+  <div class="field"><div class="label">Confirm mobile wallet account</div><div class="row"><input type="tel" placeholder="Please enter"></div></div>
+  <button class="btn" data-go="page-amount">Next</button>
+  <div class="check-row">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+  </div>
+</section>
+
+<!-- ============================================================
+     7. AMOUNT SELECTION (+ terms + schedule + confirm)
+============================================================ -->
+<section class="page" id="page-amount">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Loan Application</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="amount-lbl">Please Choose Loan Amount (PKR)</div>
+  <div class="amount-row">
+    <span id="amt-val">10,000</span>
+    <span class="chev">▾</span>
+  </div>
+  <div class="amount-lbl">Choose Number of Installments</div>
+  <div class="term-card" data-term="4">
+    <div class="t1">4 installments (total 60 days)</div>
+    <div class="t2">15 days per installment</div>
+    <div class="t2">Daily Rate: <span class="rate">0.65%</span></div>
+  </div>
+  <div class="term-card" data-term="3">
+    <div class="t1">3 installments (total 45 days)</div>
+    <div class="t2">15 days per installment</div>
+    <div class="t2">Daily Rate: <span class="rate">0.75%</span></div>
+  </div>
+  <div class="term-card sel" data-term="2">
+    <div class="t1">2 installments (total 30 days)</div>
+    <div class="t2">15 days per installment</div>
+    <div class="t2">Daily Rate: <span class="rate">0.75%</span></div>
+  </div>
+  <div class="sched-card">
+    <div class="hd">Installments Schedule</div>
+    <div id="sched-rows"></div>
+  </div>
+  <div class="detail-card">
+    <div class="hd">Loan Details</div>
+    <div class="row">Loan amount<span class="v">PKR 10,000</span></div>
+    <div class="row">Mark-up<span class="v" id="markup-v">PKR 2,250</span></div>
+    <div class="row">APR<span class="v">273.75%</span></div>
+    <div class="row">Total repayment<span class="v" id="total-v">PKR 12,250</span></div>
+  </div>
+  <div class="cool-card">
+    <div class="hd">Cooling of Period <span class="date">Before 01-03-2026</span></div>
+    Within the cooling-off period, if you settle the loan, only mandatory verification fees (CIB, NADRA) and fund transfer costs will apply. Late fee ⊕
+  </div>
+  <div class="btn-row">
+    <button class="btn ghost" data-back>Cancel</button>
+    <button class="btn" data-go="page-loan-success">Confirm and Apply</button>
+  </div>
+  <div class="check-row">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have carefully read and agree to <a>Loan Agreement</a>, <a>T&amp;C</a> and <a>Privacy Policy</a>
+  </div>
+</section>
+
+<!-- ============================================================
+     7b. LOAN SUCCESS
+============================================================ -->
+<section class="page" id="page-loan-success">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Order Submitted</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div style="text-align:center;padding:36px 20px 12px;">
+    <div style="width:84px;height:84px;border-radius:50%;background:var(--green-l);display:flex;align-items:center;justify-content:center;margin:0 auto;">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+    </div>
+    <h2 style="font-size:20px;font-weight:600;margin-top:16px;">Order Placed</h2>
+    <p style="font-size:13px;color:var(--text-2);margin-top:6px;">Your loan has been successfully applied!</p>
+  </div>
+  <div class="detail-card">
+    <div class="hd">Loan Details</div>
+    <div class="row">Loan amount<span class="v">PKR 10,000</span></div>
+    <div class="row">Amount to receive<span class="v">PKR 10,000</span></div>
+    <div class="row">APR<span class="v">273.75%</span></div>
+  </div>
+  <div class="sched-card">
+    <div class="hd">Installments Schedule</div>
+    <div class="sched-row">
+      <span class="num">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg>
+        1/2
+      </span>
+      <div class="info">
+        <div class="k">1st installment date</div>
+        <div class="v">15-03-2026</div>
+      </div>
+      <div class="info">
+        <div class="k">1st installment amount</div>
+        <div class="v">PKR 6,125</div>
+      </div>
+    </div>
+    <div class="sched-row">
+      <span class="num">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg>
+        2/2
+      </span>
+      <div class="info">
+        <div class="k">2nd installment date</div>
+        <div class="v">30-03-2026</div>
+      </div>
+      <div class="info">
+        <div class="k">2nd installment amount</div>
+        <div class="v">PKR 6,125</div>
+      </div>
+    </div>
+  </div>
+  <button class="btn" data-go="page-pending">Continue</button>
+</section>
+
+<!-- ============================================================
+     8. PENDING
+============================================================ -->
+<section class="page has-tabs" id="page-pending">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Under Review</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="illust">
+    <img src="img/shield.png" alt="">
+    <h2 id="pending-title">Credit Evaluation</h2>
+    <p id="pending-desc">Your request is being evaluated by our credit team. We will notify you via the app once the review is complete.</p>
+  </div>
+  <div class="order-card">
+    <div class="row">Loan Amount<span class="v">PKR 10,000</span></div>
+    <div class="row">Application date<span class="v">01-03-2026</span></div>
+    <div class="row">APR<span class="v">273.75%</span></div>
+  </div>
+  <div class="check-row">
+    <span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>
+    I have read <a>Terms &amp; Conditions</a> and <a>Privacy Policy</a> carefully
+  </div>
+</section>
+
+<!-- ============================================================
+     9. REPAYING
+============================================================ -->
+<section class="page has-tabs" id="page-repaying">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Repayment</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="pill">Pending Repayment</div>
+  <div class="big-amount">
+    <div class="lbl">Loan amount</div>
+    <div class="v">PKR 10,000</div>
+    <div class="sub">Application date: 01-03-2026</div>
+  </div>
+  <button class="repay-btn" data-go="page-settled">Repay Now</button>
+  <div class="repay-list-head">Repayment Schedule</div>
+  <div class="inst-card">
+    <div class="top">
+      <span class="num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg>1/2</span>
+      <span class="amt">PKR 6,125</span>
+    </div>
+    <div class="dt"><span>1st installment date: 15-03-2026</span></div>
+    <div class="due">1st installment is due today</div>
+  </div>
+  <div class="inst-card">
+    <div class="top">
+      <span class="num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg>2/2</span>
+      <span class="amt">PKR 6,125</span>
+    </div>
+    <div class="dt"><span>2nd installment date: 30-03-2026</span></div>
+    <div class="due gray">15 days till 2nd installment's due</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     10. SETTLED (modal-style)
+============================================================ -->
+<section class="page has-tabs" id="page-settled">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Settled</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div style="padding:36px 15px 0;">
+    <div class="detail-card" style="background:#fff;position:relative;">
+      <div class="hd" style="text-align:center;font-size:15px;">Repayment Receipt</div>
+      <div class="row">Loan amount<span class="v">PKR 10,000</span></div>
+      <div class="row">Status<span class="v" style="color:var(--green);">Successful repayment</span></div>
+      <div class="row">Update time<span class="v">30-03-2026</span></div>
+    </div>
+    <div style="text-align:center;margin-top:20px;">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8,12 11,15 16,9"/></svg>
+      <div style="font-size:14px;color:var(--green);margin-top:8px;font-weight:500;">Loan Settled</div>
+    </div>
+  </div>
+  <button class="btn" data-go="page-home">Back to Home</button>
+</section>
+
+<!-- ============================================================
+     11. OVERDUE (dev only)
+============================================================ -->
+<section class="page has-tabs" id="page-overdue">
+  <div class="nav">
+    <button class="back" data-back><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,2 2,10 10,18"/></svg></button>
+    <div class="title">Overdue</div>
+    <div class="right"><span class="avatar"><img src="img/cnic_sample.png" alt=""></span></div>
+  </div>
+  <div class="pill red">Overdue 2 days</div>
+  <div class="big-amount">
+    <div class="lbl">Loan amount</div>
+    <div class="v">PKR 5,000</div>
+    <div class="sub">Application date: 01-03-2026</div>
+  </div>
+  <button class="repay-btn" data-go="page-settled">Repay now</button>
+  <div class="repay-list-head">Repayment Channel</div>
+  <div class="inst-card" style="display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:13px;font-weight:500;">Repayment channel 1</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:2px;">Easypaisa</div>
+    </div>
+    <button class="btn" style="margin:0;width:auto;padding:8px 14px;font-size:12px;border-radius:14px;" data-go="page-settled">Pay<br>PKR 6,155</button>
+  </div>
+  <div class="inst-card" style="display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:13px;font-weight:500;">Repayment channel 2</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:2px;">JazzCash</div>
+    </div>
+    <button class="btn" style="margin:0;width:auto;padding:8px 14px;font-size:12px;border-radius:14px;" data-go="page-settled">Pay<br>PKR 6,155</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     12. PROFILE / MY
+============================================================ -->
+<section class="page has-tabs" id="page-profile">
+  <div class="nav" style="background:transparent;position:absolute;top:0;left:0;right:0;z-index:10;">
+    <div class="title" style="color:#fff;">My</div>
+  </div>
+  <div class="me-card">
+    <span class="avatar"><img src="img/cnic_sample.png" alt=""></span>
+    <div>
+      <div class="name">NexoCash User</div>
+      <div class="phone">+92 123 456 789</div>
+    </div>
+  </div>
+  <div class="menu">
+    <div class="it" data-go="page-repaying"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg></span>My Orders<span class="chev">›</span></div>
+    <div class="it" data-go="page-form-receiving"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 11h20"/></svg></span>Receiving Account<span class="chev">›</span></div>
+    <div class="it"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H5l-1 4z"/></svg></span>Message Center<span class="chev">›</span></div>
+    <div class="it"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>About Us<span class="chev">›</span></div>
+    <div class="it" data-go="page-privacy"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/></svg></span>Privacy Policy<span class="chev">›</span></div>
+    <div class="it" data-go="page-splash"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>Logout<span class="chev">›</span></div>
+  </div>
+</section>
+
+</div><!-- /#stage -->
+
+<!-- bottom tabs -->
+<nav id="tabs">
+  <a data-go="page-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9v9a2 2 0 01-2 2h-5v-7h-4v7H5a2 2 0 01-2-2z"/></svg>Loan</a>
+  <a data-go="page-calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14h0M8 18h2M12 18h2"/></svg>Calculator</a>
+  <a data-go="page-repaying"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 15h5"/></svg>Order</a>
+  <a data-go="page-profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg>My</a>
+</nav>
+
+<!-- watermark -->
+<div id="watermark"></div>
+
+<!-- toast -->
+<div id="toast"></div>
+
+<!-- dev toggles -->
+<div id="devtoggle">≡</div>
+<div id="devnav" class="hidden">
+  <a data-go="page-splash">Splash</a>
+  <a data-go="page-privacy">Privacy</a>
+  <a data-go="page-home">Home</a>
+  <a data-go="page-calc">Calc</a>
+  <a data-go="page-login-phone">Phone</a>
+  <a data-go="page-login-otp">OTP</a>
+  <a data-go="page-login-setpw">SetPW</a>
+  <a data-go="page-login-password">PW Login</a>
+  <a data-go="page-form-personal">Personal</a>
+  <a data-go="page-form-employment">Work</a>
+  <a data-go="page-form-witness">Witness</a>
+  <a data-go="page-form-cnic">CNIC</a>
+  <a data-go="page-form-receiving">Recv</a>
+  <a data-go="page-amount">Amount</a>
+  <a data-go="page-loan-success">Success</a>
+  <a data-go="page-pending">Pending</a>
+  <a data-go="page-repaying">Repay</a>
+  <a data-go="page-overdue">Overdue</a>
+  <a data-go="page-settled">Settled</a>
+  <a data-go="page-profile">My</a>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" capture="environment">
+
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var pages = Array.from(document.querySelectorAll('.page'));
+
+  // Move any .nav > .title out of the nav as a .page-title block below it.
+  // Skip profile page — its title sits on a transparent overlay nav.
+  pages.forEach(function (page) {
+    if (page.id === 'page-profile') return;
+    var navEl = page.querySelector('.nav');
+    if (!navEl) return;
+    var titleEl = navEl.querySelector(':scope > .title');
+    if (!titleEl) return;
+    var text = (titleEl.textContent || '').trim();
+    titleEl.remove();
+    if (!text) return;
+    var pt = document.createElement('div');
+    pt.className = 'page-title';
+    pt.textContent = text;
+    navEl.insertAdjacentElement('afterend', pt);
+  });
+
+  // Unify .nav .right across non-home/non-profile pages:
+  // ensure each has both the lang chip and the avatar (matches home nav).
+  var LANG_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>';
+  pages.forEach(function (page) {
+    if (page.id === 'page-home' || page.id === 'page-profile') return;
+    var navEl = page.querySelector('.nav');
+    if (!navEl) return;
+    var right = navEl.querySelector(':scope > .right');
+    if (!right) {
+      right = document.createElement('div');
+      right.className = 'right';
+      navEl.appendChild(right);
+    }
+    if (!right.querySelector('.lang')) {
+      var lang = document.createElement('span');
+      lang.className = 'lang';
+      lang.innerHTML = LANG_SVG + ' اردو';
+      right.insertAdjacentElement('afterbegin', lang);
+    }
+    if (!right.querySelector('.avatar')) {
+      var avatar = document.createElement('span');
+      avatar.className = 'avatar';
+      right.appendChild(avatar);
+    }
+  });
+
+  var tabs = document.getElementById('tabs');
+  var tabLinks = Array.from(tabs.querySelectorAll('a'));
+  var nav = document.getElementById('devnav');
+  var devLinks = Array.from(nav.querySelectorAll('a'));
+  var toast = document.getElementById('toast');
+  var history = [];
+
+  function rescale() {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var scale = vw / 375;
+    var designH = Math.round(vh / scale);
+    stage.style.transform = 'scale(' + scale + ')';
+    stage.style.height = designH + 'px';
+  }
+
+  function updateTabs(id) {
+    var active = document.getElementById(id);
+    if (active && active.classList.contains('has-tabs')) {
+      tabs.classList.add('on');
+    } else {
+      tabs.classList.remove('on');
+    }
+    var map = {
+      'page-home': 0, 'page-calc': 1,
+      'page-pending': 2, 'page-repaying': 2, 'page-overdue': 2, 'page-settled': 2,
+      'page-profile': 3
+    };
+    tabLinks.forEach(function (a, i) {
+      a.classList.toggle('on', map[id] === i);
+    });
+  }
+
+  function show(id, opts) {
+    opts = opts || {};
+    var target = document.getElementById(id);
+    if (!target) return;
+    var current = document.querySelector('.page.active');
+    if (current && current.id === id) return;
+    if (current && !opts.back) history.push(current.id);
+    pages.forEach(function (p) {
+      p.classList.remove('active', 'slide-in', 'slide-back', 'fade-in');
+    });
+    target.classList.add('active');
+    if (opts.fade) target.classList.add('fade-in');
+    else if (opts.back) target.classList.add('slide-back');
+    else target.classList.add('slide-in');
+    updateTabs(id);
+    devLinks.forEach(function (a) { a.classList.toggle('on', a.dataset.go === id); });
+    target.scrollTop = 0;
+    rescale();
+    if (typeof onShow === 'function') onShow(id);
+  }
+
+  function goBack() {
+    if (history.length > 0) {
+      var prev = history.pop();
+      show(prev, { back: true });
+    } else {
+      show('page-home', { back: true });
+    }
+  }
+
+  window.addEventListener('resize', rescale);
+
+  // global click: data-go, data-back
+  document.body.addEventListener('click', function (e) {
+    var goEl = e.target.closest('[data-go]');
+    if (goEl) {
+      e.preventDefault();
+      show(goEl.dataset.go);
+      return;
+    }
+    var backEl = e.target.closest('[data-back]');
+    if (backEl) {
+      e.preventDefault();
+      goBack();
+      return;
+    }
+    var checkEl = e.target.closest('.check-row');
+    if (checkEl && !e.target.closest('a')) {
+      checkEl.classList.toggle('off');
+    }
+  });
+
+  // dev toggle (hidden backdoor: triple-tap top-right corner)
+  var devTaps = 0;
+  var devTapTimer = null;
+  document.getElementById('devtoggle').addEventListener('click', function () {
+    devTaps++;
+    clearTimeout(devTapTimer);
+    devTapTimer = setTimeout(function () { devTaps = 0; }, 600);
+    if (devTaps >= 3) {
+      devTaps = 0;
+      nav.classList.toggle('hidden');
+    }
+  });
+
+  // calc slider
+  var slider = document.getElementById('calc-slider');
+  var calcAmt = document.getElementById('calc-amt');
+  if (slider) {
+    slider.addEventListener('input', function () {
+      var v = parseInt(slider.value, 10);
+      calcAmt.textContent = v.toLocaleString('en-US');
+      var pct = ((v - 1000) / (50000 - 1000)) * 100;
+      slider.style.background = 'linear-gradient(90deg, var(--primary) 0%, var(--primary) ' + pct + '%, #E6E6EC ' + pct + '%, #E6E6EC 100%)';
+    });
+  }
+
+  // term card selection + schedule rendering
+  var termCards = Array.from(document.querySelectorAll('#page-amount .term-card'));
+  var schedRows = document.getElementById('sched-rows');
+  var markupV = document.getElementById('markup-v');
+  var totalV = document.getElementById('total-v');
+  function renderSched(n) {
+    if (!schedRows) return;
+    var base = 10000;
+    var rate = n === 4 ? 0.0065 : 0.0075;
+    var days = 60;
+    if (n === 3) days = 45;
+    if (n === 2) days = 30;
+    var interest = Math.round(base * rate * days);
+    var total = base + interest;
+    var per = Math.round(total / n);
+    var html = '';
+    var d = new Date(2026, 2, 15);
+    for (var i = 1; i <= n; i++) {
+      var dd = String(d.getDate()).padStart(2, '0');
+      var mm = String(d.getMonth() + 1).padStart(2, '0');
+      var yy = d.getFullYear();
+      html += '<div class="sched-row">' +
+        '<span class="num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg>' + i + '/' + n + '</span>' +
+        '<div class="info"><div class="k">Installment date</div><div class="v">' + dd + '-' + mm + '-' + yy + '</div></div>' +
+        '<div class="info"><div class="k">Amount</div><div class="v">PKR ' + per.toLocaleString('en-US') + '</div></div>' +
+        '</div>';
+      d.setDate(d.getDate() + 15);
+    }
+    schedRows.innerHTML = html;
+    if (markupV) markupV.textContent = 'PKR ' + interest.toLocaleString('en-US');
+    if (totalV) totalV.textContent = 'PKR ' + total.toLocaleString('en-US');
+  }
+  termCards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      termCards.forEach(function (c) { c.classList.remove('sel'); });
+      card.classList.add('sel');
+      renderSched(parseInt(card.dataset.term, 10));
+    });
+  });
+  // default init
+  renderSched(2);
+
+  // file picker triggers webview chooser
+  document.querySelectorAll('.pickFile').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.getElementById('fileInput').click();
+    });
+  });
+
+  // toast helper
+  var toastT = null;
+  window.toast = function (msg, ms) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toast.classList.remove('show'); }, ms || 2000);
+  };
+
+  // per-page side effects
+  var pendingTimer = null;
+  window.onShow = function (id) {
+    if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
+    if (id === 'page-pending') {
+      var title = document.getElementById('pending-title');
+      var desc = document.getElementById('pending-desc');
+      if (title) title.textContent = 'Credit Evaluation';
+      if (desc) desc.textContent = 'Your request is being evaluated by our credit team. We will notify you via the app once the review is complete.';
+      pendingTimer = setTimeout(function () {
+        if (!document.getElementById('page-pending').classList.contains('active')) return;
+        if (title) title.textContent = 'Approved';
+        if (desc) desc.textContent = 'Congratulations! Your loan has been approved. The funds are on their way to your account.';
+        window.toast('Your loan has been approved');
+        setTimeout(function () {
+          if (document.getElementById('page-pending').classList.contains('active')) {
+            show('page-repaying');
+          }
+        }, 2000);
+      }, 3500);
+    }
+    if (id === 'page-login-phone') {
+      setTimeout(function () {
+        var inp = document.querySelector('#page-login-phone .phone-row input');
+        if (inp) inp.focus();
+      }, 280);
+    }
+    if (id === 'page-login-otp') {
+      setTimeout(function () {
+        var inp = document.querySelector('#page-login-otp .otp-row input');
+        if (inp) inp.focus();
+      }, 280);
+    }
+  };
+
+  // boot
+  show('page-splash', { fade: true });
+  setTimeout(function () {
+    if (document.getElementById('page-splash').classList.contains('active')) {
+      show('page-privacy');
+    }
+  }, 1800);
+})();
+</script>
+</body>
+</html>
